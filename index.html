@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Avant Talent — Auckland</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,11 +13,7 @@
       --hover-overlay: rgba(28,28,26,0.72);
     }
     .wrap { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); }
-    nav {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.2rem 2.5rem; background: var(--white);
-      border-bottom: 0.5px solid var(--stone); position: sticky; top: 0; z-index: 100;
-    }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2.5rem; background: var(--white); border-bottom: 0.5px solid var(--stone); position: sticky; top: 0; z-index: 100; }
     .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--charcoal); line-height: 1.2; }
     .nav-links { display: flex; gap: 2rem; align-items: center; }
     .nav-links a { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); text-decoration: none; font-weight: 500; }
@@ -48,6 +43,7 @@
     .talent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 3px; margin-top: 3px; }
     .talent-card { position: relative; aspect-ratio: 3/4; overflow: hidden; background: var(--stone); cursor: pointer; }
     .talent-card-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.6rem; }
+    .talent-card-bg img { width: 100%; height: 100%; object-fit: cover; }
     .talent-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: var(--white); }
     .talent-name-bg { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); font-weight: 500; }
     .talent-overlay { position: absolute; inset: 0; background: var(--hover-overlay); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 1.25rem; opacity: 0; transition: opacity 0.3s ease; }
@@ -182,10 +178,12 @@
   </footer>
 </div>
 
-<script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
   const SUPABASE_URL = 'https://qsvkyyahotktvvovadak.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzdmt5eWFob3RrdHZ2b3ZhZGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjI2OTIsImV4cCI6MjA5MTI5ODY5Mn0.pIitdj95aV7fMUbcLZO9LaaysuCPMxwwsbrKlcJAj9M';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const igSVG = `<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`;
   const ttSVG = `<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.56V6.82a4.85 4.85 0 01-1.07-.13z"/></svg>`;
@@ -200,8 +198,11 @@
     grid.innerHTML = data.map(t => `
       <div class="talent-card" data-cat="${t.cat}">
         <div class="talent-card-bg">
-          <div class="talent-avatar" style="background:${t.color}">${t.initials}</div>
-          <span class="talent-name-bg">${t.name}</span>
+          ${t.photo_url
+            ? `<img src="${t.photo_url}" alt="${t.name}" />`
+            : `<div class="talent-avatar" style="background:${t.color}">${t.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+               <span class="talent-name-bg">${t.name}</span>`
+          }
         </div>
         <div class="talent-overlay">
           <div class="talent-info">

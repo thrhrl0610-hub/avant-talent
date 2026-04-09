@@ -34,18 +34,20 @@
     .add-form h2 { font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 1.5rem; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
     .form-grid .field { margin-bottom: 0; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
     .form-row .field { margin-bottom: 0; }
     .btn-add { padding: 0.75rem 2rem; background: var(--charcoal); color: var(--white); border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
     .talent-list h2 { font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 1rem; }
     .talent-item { background: var(--white); border: 0.5px solid var(--stone); padding: 1rem 1.25rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; }
     .talent-item-info { display: flex; align-items: center; gap: 1rem; }
-    .talent-item-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; font-weight: 500; flex-shrink: 0; }
+    .talent-item-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white; font-weight: 500; flex-shrink: 0; }
     .talent-item-name { font-size: 0.88rem; font-weight: 500; }
     .talent-item-type { font-size: 0.72rem; color: var(--warm-mid); }
     .btn-delete { padding: 0.35rem 0.85rem; border: 0.5px solid var(--stone); background: none; cursor: pointer; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: #c0392b; font-family: 'DM Sans', sans-serif; }
     .empty-state { color: var(--warm-mid); font-size: 0.85rem; padding: 1.5rem 0; }
     .success-msg { font-size: 0.75rem; color: #27ae60; margin-top: 0.75rem; display: none; }
+    .upload-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-top: 0.5rem; display: none; border: 0.5px solid var(--stone); }
+    .uploading { font-size: 0.75rem; color: var(--warm-mid); margin-top: 0.5rem; display: none; }
   </style>
 </head>
 <body>
@@ -71,13 +73,11 @@
   <div class="admin-body">
     <p class="admin-title">Talent Roster</p>
     <p class="admin-sub">Add or remove talent from the public roster.</p>
+
     <div class="add-form">
       <h2>Add New Talent</h2>
       <div class="form-grid">
         <div class="field"><label>Full Name</label><input type="text" id="newName" placeholder="e.g. Mia Kim" /></div>
-        <div class="field"><label>Initials</label><input type="text" id="newInitials" placeholder="e.g. MK" maxlength="2" /></div>
-      </div>
-      <div class="form-row">
         <div class="field">
           <label>Category</label>
           <select id="newCat">
@@ -85,16 +85,25 @@
             <option value="model">Model</option>
           </select>
         </div>
-        <div class="field"><label>Type</label><input type="text" id="newType" placeholder="e.g. Lifestyle" /></div>
-        <div class="field"><label>Avatar Color</label><input type="color" id="newColor" value="#B8A898" style="height:42px;" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Type (e.g. Lifestyle)</label><input type="text" id="newType" placeholder="e.g. Lifestyle" /></div>
+        <div class="field"><label>Avatar Color (no photo)</label><input type="color" id="newColor" value="#B8A898" style="height:42px;" /></div>
       </div>
       <div class="form-grid">
         <div class="field"><label>Instagram URL</label><input type="text" id="newInsta" placeholder="https://instagram.com/username" /></div>
         <div class="field"><label>TikTok URL</label><input type="text" id="newTiktok" placeholder="https://tiktok.com/@username" /></div>
       </div>
+      <div class="field">
+        <label>Photo (optional)</label>
+        <input type="file" id="newPhoto" accept="image/*" />
+        <img id="uploadPreview" class="upload-preview" />
+        <p class="uploading" id="uploadingMsg">Uploading...</p>
+      </div>
       <button class="btn-add" id="addBtn">Add to Roster</button>
       <p class="success-msg" id="successMsg">✓ Talent added</p>
     </div>
+
     <div class="talent-list">
       <h2>Current Roster (<span id="talentCount">0</span>)</h2>
       <div id="talentListEl"></div>
@@ -108,13 +117,21 @@
   const SUPABASE_URL = 'https://qsvkyyahotktvvovadak.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzdmt5eWFob3RrdHZ2b3ZhZGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjI2OTIsImV4cCI6MjA5MTI5ODY5Mn0.pIitdj95aV7fMUbcLZO9LaaysuCPMxwwsbrKlcJAj9M';
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
   const PASSWORD = 'avantadmin2025';
 
   document.getElementById('loginBtn').addEventListener('click', login);
   document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
   document.getElementById('logoutBtn').addEventListener('click', logout);
   document.getElementById('addBtn').addEventListener('click', addTalent);
+
+  // 사진 미리보기
+  document.getElementById('newPhoto').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const preview = document.getElementById('uploadPreview');
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  });
 
   function login() {
     const pw = document.getElementById('passwordInput').value;
@@ -135,19 +152,45 @@
 
   async function addTalent() {
     const name = document.getElementById('newName').value.trim();
-    const initials = document.getElementById('newInitials').value.trim();
     const cat = document.getElementById('newCat').value;
     const type = document.getElementById('newType').value.trim();
     const color = document.getElementById('newColor').value;
     const insta = document.getElementById('newInsta').value.trim();
     const tiktok = document.getElementById('newTiktok').value.trim();
+    const photoFile = document.getElementById('newPhoto').files[0];
 
-    if (!name || !initials) return alert('Name and initials are required');
+    if (!name) return alert('Name is required');
 
-    const { error } = await supabase.from('talent').insert([{ name, initials, cat, type, color, insta, tiktok }]);
+    let photo_url = null;
+
+    if (photoFile) {
+      document.getElementById('uploadingMsg').style.display = 'block';
+      const ext = photoFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('talent-photos')
+        .upload(fileName, photoFile, { contentType: photoFile.type });
+
+      if (uploadError) {
+        document.getElementById('uploadingMsg').style.display = 'none';
+        return alert('Upload error: ' + uploadError.message);
+      }
+
+      const { data: urlData } = supabase.storage.from('talent-photos').getPublicUrl(fileName);
+      photo_url = urlData.publicUrl;
+      document.getElementById('uploadingMsg').style.display = 'none';
+    }
+
+    const { error } = await supabase.from('talent').insert([{ name, cat, type, color, insta, tiktok, photo_url }]);
     if (error) return alert('Error: ' + error.message);
 
-    ['newName','newInitials','newType','newInsta','newTiktok'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('newName').value = '';
+    document.getElementById('newType').value = '';
+    document.getElementById('newInsta').value = '';
+    document.getElementById('newTiktok').value = '';
+    document.getElementById('newPhoto').value = '';
+    document.getElementById('uploadPreview').style.display = 'none';
+
     const msg = document.getElementById('successMsg');
     msg.style.display = 'block';
     setTimeout(() => msg.style.display = 'none', 3000);
@@ -171,7 +214,10 @@
     el.innerHTML = data.map(t => `
       <div class="talent-item">
         <div class="talent-item-info">
-          <div class="talent-item-avatar" style="background:${t.color}">${t.initials}</div>
+          ${t.photo_url
+            ? `<img src="${t.photo_url}" class="talent-item-avatar" style="border-radius:50%;" />`
+            : `<div class="talent-item-avatar" style="background:${t.color}">${t.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>`
+          }
           <div>
             <p class="talent-item-name">${t.name}</p>
             <p class="talent-item-type">${t.cat.charAt(0).toUpperCase()+t.cat.slice(1)} · ${t.type}</p>
