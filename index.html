@@ -29,10 +29,7 @@
     .btn-primary:hover { background: #333; }
     .btn-ghost { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); font-weight: 500; cursor: pointer; border: 0.5px solid var(--stone); padding: 0.75rem 1.5rem; border-radius: 2px; background: transparent; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
     .btn-ghost:hover { border-color: var(--accent); color: var(--charcoal); }
-    .hero-image { background: var(--stone); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.75rem; }
-    .ph-icon { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; }
-    .ph-icon svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; }
-    .ph-label { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-family: 'DM Sans', sans-serif; font-weight: 500; }
+    .hero-image { background: var(--stone); position: relative; overflow: hidden; min-height: 420px; border-radius: 24px; margin: 1.5rem; }
     .section-header { padding: 2.5rem 2.5rem 1.5rem; display: flex; align-items: baseline; justify-content: space-between; border-bottom: 0.5px solid var(--stone); background: var(--white); }
     .section-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--charcoal); }
     .section-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--warm-mid); font-weight: 500; }
@@ -80,7 +77,7 @@
       nav { padding: 1rem 1.25rem; }
       .nav-links { gap: 1rem; }
       .hero { grid-template-columns: 1fr; }
-      .hero-image { min-height: 260px; }
+      .hero-image { min-height: 320px; margin: 1rem; }
       .hero-text { padding: 2rem 1.25rem; }
       .hero-title { font-size: 2.2rem; }
       .section-header { padding: 1.5rem 1.25rem 1rem; }
@@ -117,11 +114,9 @@
         <button class="btn-ghost" onclick="document.getElementById('representation').scrollIntoView({behavior:'smooth'})">Apply for Representation</button>
       </div>
     </div>
-    <div class="hero-image">
-      <div class="ph-icon">
-        <svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      </div>
-      <span class="ph-label">Hero Image</span>
+    <div class="hero-image" id="heroSlider">
+      <div id="heroSlides" style="position:absolute;inset:0;"></div>
+      <div id="heroDots" style="position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);display:flex;gap:0.4rem;z-index:10;"></div>
     </div>
   </section>
 
@@ -219,6 +214,50 @@
     initFilters();
   }
 
+  async function loadHeroSlider() {
+    const { data } = await supabase.from('talent').select('name, photo_url, cat, type').order('created_at');
+    if (!data) return;
+    const slides = data.filter(t => t.photo_url);
+    if (slides.length === 0) return;
+
+    const container = document.getElementById('heroSlides');
+    const dots = document.getElementById('heroDots');
+    let current = 0;
+
+    container.innerHTML = slides.map((t, i) => `
+      <div class="hero-slide" style="
+        position:absolute;inset:0;
+        background:url('${t.photo_url}') center/cover no-repeat;
+        opacity:${i === 0 ? 1 : 0};
+        transition:opacity 0.8s ease;
+      ">
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,28,26,0.55) 0%,transparent 55%);border-radius:24px;"></div>
+        <div style="position:absolute;bottom:2.5rem;left:2rem;color:white;">
+          <p style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;">${t.name}</p>
+          <p style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;opacity:0.7;margin-top:0.2rem;">${t.cat} · ${t.type}</p>
+        </div>
+      </div>
+    `).join('');
+
+    dots.innerHTML = slides.map((_, i) => `
+      <div class="hero-dot" data-i="${i}" style="width:6px;height:6px;border-radius:50%;background:${i===0?'white':'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.3s;"></div>
+    `).join('');
+
+    dots.querySelectorAll('.hero-dot').forEach(dot => {
+      dot.addEventListener('click', () => goTo(parseInt(dot.dataset.i)));
+    });
+
+    function goTo(n) {
+      container.querySelectorAll('.hero-slide')[current].style.opacity = 0;
+      dots.querySelectorAll('.hero-dot')[current].style.background = 'rgba(255,255,255,0.4)';
+      current = n;
+      container.querySelectorAll('.hero-slide')[current].style.opacity = 1;
+      dots.querySelectorAll('.hero-dot')[current].style.background = 'white';
+    }
+
+    setInterval(() => goTo((current + 1) % slides.length), 3000);
+  }
+
   function initFilters() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -233,6 +272,7 @@
   }
 
   loadTalent();
+  loadHeroSlider();
 </script>
 </body>
 </html>
