@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Avant Talent — Admin</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,11 +18,7 @@
     .login-sub { font-size: 0.8rem; color: var(--warm-mid); margin-bottom: 2rem; }
     .field { margin-bottom: 1.25rem; }
     .field label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 0.4rem; }
-    .field input, .field select {
-      width: 100%; padding: 0.65rem 0.85rem;
-      border: 0.5px solid var(--stone); background: var(--cream);
-      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--charcoal); outline: none;
-    }
+    .field input, .field select { width: 100%; padding: 0.65rem 0.85rem; border: 0.5px solid var(--stone); background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--charcoal); outline: none; }
     .field input:focus, .field select:focus { border-color: var(--accent); }
     .btn { width: 100%; padding: 0.75rem; background: var(--charcoal); color: var(--white); border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
     .btn:hover { background: #333; }
@@ -61,9 +56,9 @@
     <p class="login-sub">Admin access only</p>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="passwordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()" />
+      <input type="password" id="passwordInput" placeholder="Enter password" />
     </div>
-    <button class="btn" type="button" onclick="login()">Enter</button>
+    <button class="btn" id="loginBtn">Enter</button>
     <p class="error" id="loginError">Incorrect password</p>
   </div>
 </div>
@@ -71,12 +66,11 @@
 <div class="admin-wrap" id="adminWrap">
   <nav class="admin-nav">
     <span class="admin-nav-logo">Avant Talent — Admin</span>
-    <button class="admin-nav-logout" onclick="logout()">Log out</button>
+    <button class="admin-nav-logout" id="logoutBtn">Log out</button>
   </nav>
   <div class="admin-body">
     <p class="admin-title">Talent Roster</p>
     <p class="admin-sub">Add or remove talent from the public roster.</p>
-
     <div class="add-form">
       <h2>Add New Talent</h2>
       <div class="form-grid">
@@ -98,10 +92,9 @@
         <div class="field"><label>Instagram URL</label><input type="text" id="newInsta" placeholder="https://instagram.com/username" /></div>
         <div class="field"><label>TikTok URL</label><input type="text" id="newTiktok" placeholder="https://tiktok.com/@username" /></div>
       </div>
-      <button class="btn-add" onclick="addTalent()">Add to Roster</button>
+      <button class="btn-add" id="addBtn">Add to Roster</button>
       <p class="success-msg" id="successMsg">✓ Talent added</p>
     </div>
-
     <div class="talent-list">
       <h2>Current Roster (<span id="talentCount">0</span>)</h2>
       <div id="talentListEl"></div>
@@ -109,12 +102,19 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
   const SUPABASE_URL = 'https://qsvkyyahotktvvovadak.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzdmt5eWFob3RrdHZ2b3ZhZGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjI2OTIsImV4cCI6MjA5MTI5ODY5Mn0.pIitdj95aV7fMUbcLZO9LaaysuCPMxwwsbrKlcJAj9M';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const PASSWORD = 'avantadmin2025';
+
+  document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  document.getElementById('addBtn').addEventListener('click', addTalent);
 
   function login() {
     const pw = document.getElementById('passwordInput').value;
@@ -177,9 +177,13 @@
             <p class="talent-item-type">${t.cat.charAt(0).toUpperCase()+t.cat.slice(1)} · ${t.type}</p>
           </div>
         </div>
-        <button class="btn-delete" onclick="deleteTalent(${t.id})">Remove</button>
+        <button class="btn-delete" data-id="${t.id}">Remove</button>
       </div>
     `).join('');
+
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', () => deleteTalent(btn.dataset.id));
+    });
   }
 </script>
 </body>
