@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avant Talent — Admin</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #F7F4EF; --stone: #E8E3DA; --charcoal: #1C1C1A;
+      --warm-mid: #6B6560; --accent: #B8A898; --white: #FDFCFB;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); }
+
+    /* LOGIN */
+    .login-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: var(--white); padding: 3rem; width: 360px;
+      border: 0.5px solid var(--stone);
+    }
+    .login-title {
+      font-size: 1.2rem; font-weight: 500; margin-bottom: 0.5rem;
+    }
+    .login-sub { font-size: 0.8rem; color: var(--warm-mid); margin-bottom: 2rem; }
+    .field { margin-bottom: 1.25rem; }
+    .field label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 0.4rem; }
+    .field input {
+      width: 100%; padding: 0.65rem 0.85rem;
+      border: 0.5px solid var(--stone); background: var(--cream);
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--charcoal);
+      outline: none;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .btn {
+      width: 100%; padding: 0.75rem; background: var(--charcoal); color: var(--white);
+      border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    }
+    .btn:hover { background: #333; }
+    .error { font-size: 0.75rem; color: #c0392b; margin-top: 0.75rem; display: none; }
+
+    /* ADMIN PANEL */
+    .admin-wrap { display: none; }
+    .admin-nav {
+      background: var(--charcoal); padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .admin-nav-logo { color: var(--white); font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .admin-nav-logout {
+      color: var(--accent); font-size: 0.72rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer; background: none; border: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .admin-body { padding: 2.5rem 2rem; max-width: 900px; margin: 0 auto; }
+    .admin-title { font-size: 1.4rem; font-weight: 500; margin-bottom: 0.5rem; }
+    .admin-sub { font-size: 0.82rem; color: var(--warm-mid); margin-bottom: 2rem; }
+
+    .add-form {
+      background: var(--white); border: 0.5px solid var(--stone);
+      padding: 2rem; margin-bottom: 2.5rem;
+    }
+    .add-form h2 { font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 1.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-grid .field { margin-bottom: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-row .field { margin-bottom: 0; }
+    .btn-add {
+      padding: 0.75rem 2rem; background: var(--charcoal); color: var(--white);
+      border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    }
+
+    .talent-list h2 { font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 1rem; }
+    .talent-item {
+      background: var(--white); border: 0.5px solid var(--stone);
+      padding: 1rem 1.25rem; margin-bottom: 0.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .talent-item-info { display: flex; align-items: center; gap: 1rem; }
+    .talent-item-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; color: white; font-weight: 500; flex-shrink: 0;
+    }
+    .talent-item-name { font-size: 0.88rem; font-weight: 500; }
+    .talent-item-type { font-size: 0.72rem; color: var(--warm-mid); }
+    .talent-item-actions { display: flex; gap: 0.5rem; }
+    .btn-delete {
+      padding: 0.35rem 0.85rem; border: 0.5px solid var(--stone);
+      background: none; cursor: pointer; font-size: 0.65rem;
+      letter-spacing: 0.08em; text-transform: uppercase; color: #c0392b;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .empty-state { color: var(--warm-mid); font-size: 0.85rem; padding: 1.5rem 0; }
+    .success-msg { font-size: 0.75rem; color: #27ae60; margin-top: 0.75rem; display: none; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <p class="login-title">Avant Talent</p>
+    <p class="login-sub">Admin access only</p>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="passwordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()" />
+    </div>
+    <button class="btn" onclick="login()">Enter</button>
+    <p class="error" id="loginError">Incorrect password</p>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-wrap" id="adminWrap">
+  <nav class="admin-nav">
+    <span class="admin-nav-logo">Avant Talent — Admin</span>
+    <button class="admin-nav-logout" onclick="logout()">Log out</button>
+  </nav>
+
+  <div class="admin-body">
+    <p class="admin-title">Talent Roster</p>
+    <p class="admin-sub">Add or remove talent from the public roster.</p>
+
+    <div class="add-form">
+      <h2>Add New Talent</h2>
+      <div class="form-grid">
+        <div class="field"><label>Full Name</label><input type="text" id="newName" placeholder="e.g. Mia Kim" /></div>
+        <div class="field"><label>Initials</label><input type="text" id="newInitials" placeholder="e.g. MK" maxlength="2" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Category</label>
+          <select id="newCat" style="width:100%;padding:0.65rem 0.85rem;border:0.5px solid var(--stone);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;">
+            <option value="influencer">Influencer</option>
+            <option value="model">Model</option>
+          </select>
+        </div>
+        <div class="field"><label>Type (e.g. Lifestyle)</label><input type="text" id="newType" placeholder="e.g. Lifestyle" /></div>
+        <div class="field"><label>Avatar Color</label><input type="color" id="newColor" value="#B8A898" style="width:100%;padding:0.3rem;height:42px;border:0.5px solid var(--stone);background:var(--cream);" /></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Instagram URL</label><input type="text" id="newInsta" placeholder="https://instagram.com/username" /></div>
+        <div class="field"><label>TikTok URL</label><input type="text" id="newTiktok" placeholder="https://tiktok.com/@username" /></div>
+      </div>
+      <button class="btn-add" onclick="addTalent()">Add to Roster</button>
+      <p class="success-msg" id="successMsg">✓ Talent added successfully</p>
+    </div>
+
+    <div class="talent-list">
+      <h2>Current Roster (<span id="talentCount">0</span>)</h2>
+      <div id="talentListEl"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PASSWORD = 'avantadmin2025';
+
+  // 기본 탤런트 데이터
+  const defaultTalent = [
+    { id: 1, name: 'Mia Kim', initials: 'MK', cat: 'influencer', type: 'Lifestyle', color: '#B8A898', insta: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+    { id: 2, name: 'Jake Tama', initials: 'JT', cat: 'model', type: 'Editorial', color: '#8A9E90', insta: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+    { id: 3, name: 'Sofia Park', initials: 'SP', cat: 'influencer', type: 'Fashion', color: '#B8967A', insta: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+    { id: 4, name: 'Riley Lee', initials: 'RL', cat: 'model', type: 'Commercial', color: '#7A8A9E', insta: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+    { id: 5, name: 'Aroha Wiki', initials: 'AW', cat: 'influencer', type: 'Beauty', color: '#9E8A7A', insta: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+    { id: 6, name: 'Caleb Ngata', initials: 'CN', cat: 'model', type: 'Lifestyle', color: '#6E8A7A', insta: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+  ];
+
+  let talent = JSON.parse(localStorage.getItem('avantTalent')) || defaultTalent;
+
+  function save() {
+    localStorage.setItem('avantTalent', JSON.stringify(talent));
+  }
+
+  function login() {
+    const pw = document.getElementById('passwordInput').value;
+    if (pw === PASSWORD) {
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('adminWrap').style.display = 'block';
+      renderList();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    document.getElementById('loginWrap').style.display = 'flex';
+    document.getElementById('adminWrap').style.display = 'none';
+    document.getElementById('passwordInput').value = '';
+  }
+
+  function addTalent() {
+    const name = document.getElementById('newName').value.trim();
+    const initials = document.getElementById('newInitials').value.trim();
+    const cat = document.getElementById('newCat').value;
+    const type = document.getElementById('newType').value.trim();
+    const color = document.getElementById('newColor').value;
+    const insta = document.getElementById('newInsta').value.trim();
+    const tiktok = document.getElementById('newTiktok').value.trim();
+
+    if (!name || !initials) return alert('Name and initials are required');
+
+    talent.push({ id: Date.now(), name, initials, cat, type, color, insta, tiktok });
+    save();
+    renderList();
+
+    // 폼 초기화
+    ['newName','newInitials','newType','newInsta','newTiktok'].forEach(id => document.getElementById(id).value = '');
+    const msg = document.getElementById('successMsg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  }
+
+  function deleteTalent(id) {
+    if (!confirm('Remove this talent from the roster?')) return;
+    talent = talent.filter(t => t.id !== id);
+    save();
+    renderList();
+  }
+
+  function renderList() {
+    const el = document.getElementById('talentListEl');
+    document.getElementById('talentCount').textContent = talent.length;
+    if (talent.length === 0) {
+      el.innerHTML = '<p class="empty-state">No talent added yet.</p>';
+      return;
+    }
+    el.innerHTML = talent.map(t => `
+      <div class="talent-item">
+        <div class="talent-item-info">
+          <div class="talent-item-avatar" style="background:${t.color}">${t.initials}</div>
+          <div>
+            <p class="talent-item-name">${t.name}</p>
+            <p class="talent-item-type">${t.cat.charAt(0).toUpperCase()+t.cat.slice(1)} · ${t.type}</p>
+          </div>
+        </div>
+        <div class="talent-item-actions">
+          <button class="btn-delete" onclick="deleteTalent(${t.id})">Remove</button>
+        </div>
+      </div>
+    `).join('');
+  }
+</script>
+
+</body>
+</html>
